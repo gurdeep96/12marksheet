@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>12th form</title>
+
+	<meta charset="UTF-8">
+	<meta name="description" content="12 Form">
+	<meta name="keywords" content="HTML, CSS, XML, JavaScript">
+	<meta name="author" content="Gurdeep Singh">
+	<script src="frm.js"></script>
+	<style>
+		body{
+			background: linear-gradient(to right,#00FFFF,#EEE8AA,#00FFFF);
+			text-align:center;
+			font-family: "arial";
+			font-variant:normal;
+			font-size:20px;
+		}
+		table{
+			background-color: #F5DEB3;
+		}
+		button[type=submit],button[type=reset]{
+			background-color: #191970;
+			color: white;
+			font-size:15px;
+			width:15%;
+			padding:10px;
+		}
+		button[type=submit]:hover,button[type=reset]:hover{
+			background-color:powderblue;
+			color: black;
+			cursor:pointer;
+		}
+		input[type=text],input[type=month],select{
+			width:400px;
+			padding:6px;
+			font-size:15px;
+		}
+		input[type=text]:focus{
+			background-color:powderblue;
+		}
+	</style>
+</head>
+
+<h2 align="center" style="font-family:verdana">12th Board Examination Form</h2> 
+<body>
+<fieldset>
+<legend align="left"><strong>12th MARKSHEET FORM</strong></legend>
+<form name="myform" action="form1php.php" onsubmit="return myFunction()" method="POST">
+	<table align="center" cellspacing="0" cellpadding="4" width="80%">
+	<tr>
+		<td>FIRST NAME</td>
+		<td>:</td>
+		<td><input type="text" name="fname"></td>
+	</tr>
+	<tr>
+		<td>MIDDLE NAME</td>
+		<td>:</td>
+		<td><input type="text" name="mname"></td>
+	</tr>
+	<tr>
+		<td>LAST NAME</td>
+		<td>:</td>
+		<td><input type="text" name="lname"></td>
+	</tr>
+	<tr>
+		<td>CANDIDATE'S MOTHER NAME</td>
+		<td>:</td>
+		<td><input type="text" name="momname"></td>
+	</tr>
+	<tr>
+		<td>DIVISIONAL BOARD</td>
+		<td>:</td>
+		<td><select name="divboard">
+			<option selected="~SELECT" disabled="~SELECT" value="none">SELECT</option>
+			<option value="mumbai">MUMBAI</option>
+			<option value="pune">PUNE</option>
+			<option value="nagpur">NAGPUR</option>
+			<option value="aurangabad">AURANGABAD</option>
+			<option value="kolhapur">KOLHAPUR</option>
+			<option value="nashik">NASHIK</option>
+			<option value="latur">LATUR</option>
+			<option value="amravati">AMRAVATI</option>
+			<option value="konkan">KONKAN</option>
+		</select></td>
+	</tr>
+	<tr>
+		<td>STREAM</td>
+		<td>:</td>
+		<td><input type="text" name="stream"></td>
+	</tr>
+	<tr>
+		<td>SEAT NO.</td>
+		<td>:</td>
+		<td><input type="text" name="seatno"></td>
+	</tr>
+	<tr>
+		<td>CENTER NO.</td>
+		<td>:</td>
+		<td><input type="text" name="centerno"></td>
+	</tr>
+	<tr>
+		<td>DISTRICT AND SCHOOL NO.</td>
+		<td>:</td>
+		<td><input type="text" name="dnsno"></td>
+	</tr>
+	<tr>
+		<td>MONTH AND YEAR OF EXAM</td>
+		<td>:</td>
+		<td><input type="month" name="emonth"></td>
+	</tr>
+	<tr>
+		<td>SR. NO. OF STATEMENT</td>
+		<td>:</td>
+		<td><input type="text" name="srno"></td>
+	</tr>
+	</table>
+	<button type="submit" name="SUBMIT" value="SUBMIT">SUBMIT</button>
+	<button type="reset" value="RESET">RESET</button>
+</form>
+</fieldset>
+
+
+</body>
+</html>

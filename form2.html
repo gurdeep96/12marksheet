@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>12th form2</title>
+
+	<meta charset="UTF-8">
+	<meta name="description" content="12 Marks Form">
+	<meta name="keywords" content="HTML, CSS, XML, JavaScript">
+	<meta name="author" content="Gurdeep Singh">
+	<script src="frm2.js"></script>
+	<style>
+		body{
+			background-color: #FFEBCD;
+			text-align:center;
+			font-family: "arial";
+			font-variant:normal;
+			font-size:18px;
+		}
+		table{
+			background-color: #DCDCDC;
+		}
+		button[type=submit],button[type=reset],button[type=text],button[type=number]{
+			background-color: #191970;
+			color: white;
+			font-size:18px;
+			width:15%;
+		}
+		input[type=text]{
+			width:250px;
+			padding:6px;
+		}
+		input[type=text]:focus{
+			background-color:powderblue;
+		}
+		button[type=submit]:hover,button[type=reset]:hover,button[type=text]:hover,button[type=number]:hover{
+			background-color:powderblue;
+			color: black;
+			cursor:pointer;
+		}
+		#t1{
+			border:2px solid black;
+			background-color: #FFA07A;
+		}
+	</style>
+</head>
+
+<h2 align="center" style="font-family:verdana">MARKS OBTAINED FORM</h2> 
+<body>
+<fieldset>
+<legend align="left"><strong>ENTER THE MARKS</strong></legend>
+<form name="myform2" action="form2php.php" method="POST">
+<table align="center" border="1" cellspacing="1" cellpadding="4" width="80%">
+<tr>
+		<td><strong>CANDIDATE SEAT NO.</strong></td>
+		<td>:</td>
+		<td colspan=2><input type="text" name="seatno"></td>
+</tr>
+<tr>
+	<td><strong>SUBJECT</strong></td>
+	<td><strong>MARKS OBTAINED</strong></td>
+	<td><strong>SUBJECT CODE</strong></td>
+	<td><strong>GRADE OBTAINED</strong></td>
+</tr>
+<tr>
+	<td>MATHEMATICS</td>
+	<td><input type="text" name="maths"></td>
+	<td>01</td>
+	<td><input type="text" name="mathsgrade"></td>
+</tr>
+<tr>
+	<td>ENGLISH</td>
+	<td><input type="text" name="english"></td>
+	<td>02</td>
+	<td><input type="text" name="enggrade"></td>
+</tr>
+<tr>
+	<td>PHYSICS</td>
+	<td><input type="text" name="physics"></td>
+	<td>38</td>
+	<td><input type="text" name="phygrade"></td>
+</tr>
+<tr>
+	<td>CHEMISTRY</td>
+	<td><input type="text" name="chemistry"></td>
+	<td>42</td>
+	<td><input type="text" name="chemgrade"></td>
+</tr>
+<tr>
+	<td>COMPUTER SCIENCE</td>
+	<td><input type="text" name="cs"></td>
+	<td>45</td>
+	<td><input type="text" name="csgrade"></td>
+</tr>
+<tr>
+	<td>MARATHI</td>
+	<td><input type="text" name="marathi"></td>
+	<td>49</td>
+	<td><input type="text" name="marathigrade"></td>
+</tr>
+<tr>
+  <td colspan="4"><button type="submit" name="SUBMIT" value="SUBMIT">SUBMIT</button>&emsp;<button type="text" value="num" onclick="return myfunction()">CALCULATE</button>&emsp;<button type="reset" value="reset"/>RESET</button</td>
+</tr>
+</table>
+<br>
+<hr>
+<br>
+<table id="t1" align="center" width="40%">
+<tr>
+	<td><strong>TOTAL MARKS</strong></td>
+	<td><input type="text" name="totalmarks" id="total"></td>
+</tr>
+<tr>
+	<td><strong>OVERALL GRADE</strong></td>
+	<td><input type="text" name="totalgrade" id="tg"</td>
+</tr>
+<tr>
+	<td><strong>PERCENTAGE(%)</strong></td>
+	<td><input type="text" name="percentage"></td>
+</tr>
+<tr>
+	<td><strong>RESULT</strong></td>
+	<td><input type="text" name="result"></td>
+</tr>
+</table>
+
+</form>
+</fieldset>
+
+</body>
+
+</html>
