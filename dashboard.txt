@@ -1,0 +1,452 @@
+package exceldashboard;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.event.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.sql.*;
+import java.util.*;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.*;
+
+import java.awt.Font;
+import java.awt.Cursor;
+
+public class Dashboard implements ActionListener {
+	JFrame f,summary;  
+	JTabbedPane tp;
+	JPanel p1,p2;
+	JLabel l1;
+	File file;
+	JFileChooser fc;
+	JScrollPane scroll,scroll2;
+	String fileName, filepath, filedate,filestr, dat,from;
+	String[] columnNames = { "Region", "Rep", "Item"};
+	String[] sumcolumnNames = {"Total Feeds","SLA Breaches","No Breach"};
+	JButton b1,btnNewButton;
+	
+	JComboBox comboBox;
+	DefaultTableModel model,summodel;
+	
+	private JLabel lblNewLabel;
+	private JTable table,tab;
+	Connection con = null;
+	String jdbcURL ="jdbc:derby:exceldb;create=true";
+    //String username = "root";
+    //String password = "";
+    int slabreach=0;
+    Vector v=null;
+    private JButton btnDelete;
+    private JButton btnSummary;
+    private JTextField textField;
+	Dashboard(){  
+	    f=new JFrame("Dashboard");  
+	    f.getContentPane().setBackground(Color.GRAY);
+	    p2=new JPanel();  
+	   
+	    tp=new JTabbedPane();  
+	    tp.setBounds(10,22,1250,650);  
+	    p1=new JPanel();   
+	    p1.setForeground(Color.BLACK);
+	    p1.setBounds(20,20,1000,500); 
+	    b1 = new JButton("Upload File");
+	    b1.setForeground(new Color(0, 0, 0));
+	    b1.setBackground(Color.ORANGE);
+	    b1.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+	    b1.setFont(new Font("Tahoma", Font.PLAIN, 13));
+	    b1.setBounds(100,50,95,30); 
+	    b1.addActionListener(this);   
+	    SpringLayout sl_p1 = new SpringLayout();
+	    sl_p1.putConstraint(SpringLayout.SOUTH, b1, -291, SpringLayout.SOUTH, p1);
+	    sl_p1.putConstraint(SpringLayout.EAST, b1, -660, SpringLayout.EAST, p1);
+	    p1.setLayout(sl_p1);
+	    l1 = new JLabel("Select the file you want to upload");
+	    sl_p1.putConstraint(SpringLayout.NORTH, b1, 49, SpringLayout.SOUTH, l1);
+	    sl_p1.putConstraint(SpringLayout.WEST, b1, 0, SpringLayout.WEST, l1);
+	    sl_p1.putConstraint(SpringLayout.NORTH, l1, 144, SpringLayout.NORTH, p1);
+	    sl_p1.putConstraint(SpringLayout.SOUTH, l1, -384, SpringLayout.SOUTH, p1);
+	    sl_p1.putConstraint(SpringLayout.WEST, l1, 301, SpringLayout.WEST, p1);
+	    sl_p1.putConstraint(SpringLayout.EAST, l1, 633, SpringLayout.WEST, p1);
+	    l1.setFont(new Font("Tahoma", Font.BOLD, 16));
+	    l1.setBounds(20,50, 100,30);  
+	    p1.add(l1);
+	    p1.add(b1);
+	    tp.add("Upload File",p1);  
+	    tp.add("View Results",p2);
+	    p2.setLayout(null);
+	    
+	    lblNewLabel = new JLabel("Genesis Outbound Monitoring\r\n");
+	    lblNewLabel.setBounds(28, 11, 255, 45);
+	    lblNewLabel.setFont(new Font("Tahoma", Font.BOLD, 15));
+	    p2.add(lblNewLabel);
+	    
+		 try {
+	    	 	
+	    	  //Class.forName("oracle.jdbc.driver.OracleDriver");
+	    		//Class.forName("com.mysql.jdbc.Driver"); 
+	    		Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
+	            //Connection con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:xe","system","root");
+	    		Connection con = DriverManager.getConnection(jdbcURL);
+	            
+	            DatabaseMetaData dbmd = con.getMetaData();
+	            ResultSet rst = dbmd.getTables(null, "MYSCHEMA", "MYTABLE", null);
+	            if(!rst.next())
+	            {
+	                Statement st = con.createStatement();
+	                
+	                //Executing the query
+	                String que = "CREATE TABLE excel2(filedate varchar(20),region varchar(20),rep varchar(20),item varchar(20))";
+	                   st.execute(que);
+	                   System.out.println("Table created");
+	            }
+		 }catch(Exception e) {
+			 System.out.println(e);
+		 }
+		 try {
+			 Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
+	    		Connection con = DriverManager.getConnection(jdbcURL);
+	            Statement st = con.createStatement();
+	            ResultSet rs = st.executeQuery("select DISTINCT filedate from excel2");
+
+	             v = new Vector();
+
+	            while (rs.next()) {
+
+	                dat= rs.getString(1);
+
+	                v.add(dat);
+
+	            }
+	            comboBox = new JComboBox(v);
+	            comboBox.setBounds(35, 87, 135, 31);
+	            comboBox.setFont(new Font("Tahoma", Font.BOLD, 14));
+	    	    p2.add(comboBox);
+	    	    table = new JTable();
+	    	    table.setFont(new Font("Tahoma",Font.PLAIN, 14));
+	    	    scroll = new JScrollPane(table);
+	    	    scroll.setBounds(28, 148, 1149, 408);
+
+	            scroll.setHorizontalScrollBarPolicy(
+
+	                    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+
+	            scroll.setVerticalScrollBarPolicy(
+
+	                    JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+	    	    p2.add(scroll);
+	    	    btnNewButton = new JButton("View");
+	    	    btnNewButton.setForeground(Color.WHITE);
+	    	    btnNewButton.setBackground(new Color(0, 128, 0));
+	    	    btnNewButton.setBounds(255, 85, 117, 38);
+	    	    btnNewButton.addActionListener(this);   
+	    	    p2.add(btnNewButton);
+	    	    
+	    	    btnDelete = new JButton("Delete");
+	    	    btnDelete.setForeground(Color.WHITE);
+	    	    btnDelete.setBackground(new Color(255, 0, 0));
+	    	    btnDelete.setBounds(464, 85, 128, 39);
+	    	    btnDelete.addActionListener(this);  
+	    	    p2.add(btnDelete);
+	    	    
+	    	    JLabel lblSelectDateFrom = new JLabel("Select date from dropdown to see or delete records of that date:");
+	    	    lblSelectDateFrom.setFont(new Font("Tahoma", Font.PLAIN, 13));
+	    	    lblSelectDateFrom.setBounds(38, 53, 410, 23);
+	    	    p2.add(lblSelectDateFrom);
+	    	    
+	    	    btnSummary = new JButton("Summary");
+	    	    btnSummary.setBackground(Color.ORANGE);
+	    	    btnSummary.setForeground(Color.BLACK);
+	    	    btnSummary.setBounds(689, 87, 135, 38);
+	    	    btnSummary.addActionListener(this);  
+	    	    p2.add(btnSummary);
+	    	    
+	    	    JLabel lblTotalCount = new JLabel("Total Count :");
+	    	    lblTotalCount.setFont(new Font("Tahoma", Font.BOLD, 11));
+	    	    lblTotalCount.setBounds(50, 567, 85, 27);
+	    	    p2.add(lblTotalCount);
+	    	    
+	    	    textField = new JTextField();
+	    	    textField.setBackground(new Color(255, 255, 255));
+	    	    textField.setEditable(false);
+	    	    textField.setBounds(132, 570, 107, 20);
+	    	    p2.add(textField);
+	    	    textField.setColumns(10);
+		 }catch(Exception e) {
+			 System.out.println(e);
+		 }
+	          
+   
+	    f.getContentPane().add(tp);  
+	    f.setSize(1250,700);  
+	    f.getContentPane().setLayout(null);  
+	    f.setExtendedState(f.getExtendedState() | JFrame.MAXIMIZED_BOTH);
+	    f.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+	    
+	    f.setVisible(true);  
+	}
+	
+	public void actionPerformed(ActionEvent e) {
+	     if (e.getSource() == btnNewButton) {
+
+	    	  model = new DefaultTableModel();
+	    	  //model = new ReverseOrderModelDecorator(new  MyTableModel());
+	          model.setColumnIdentifiers(columnNames);
+	          table.setModel(model);
+	          table.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 14));
+	          table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+	          table.setFillsViewportHeight(true);
+	          from = (String) comboBox.getSelectedItem();
+
+	          String uname = "";
+	          String email = "";
+	          String pass = "";
+
+	          try {
+	        	Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
+	        	//Class.forName("com.mysql.jdbc.Driver");           
+	      		Connection con2 = DriverManager.getConnection(jdbcURL);  
+	      		PreparedStatement pst1 = con2.prepareStatement("select count(filedate) from excel2 where filedate='" + from + "'");
+	      		 ResultSet rs1 = pst1.executeQuery();
+	      		 if(rs1.next()) {
+	      		 String rcount = rs1.getString(1);
+	      		 textField.setText(rcount);
+	      		 }
+	              PreparedStatement pst = con2.prepareStatement("select * from excel2 where filedate='" + from + "'");
+	              ResultSet rs = pst.executeQuery();
+	              int i = 0;
+	              while (rs.next()) {
+	                  uname = rs.getString("region");
+	                  email = rs.getString("rep");
+	                  pass = rs.getString("item");                
+	                  
+	                  model.addRow(new Object[]{uname, email, pass});
+	                  i++;
+	              }
+	              if (i < 1) {
+	                  JOptionPane.showMessageDialog(f, "No Record Found", "Error", JOptionPane.ERROR_MESSAGE);
+	              }
+	             
+	              p2.add(scroll);
+	              
+	              rs.close();
+	              rs1.close();
+	              pst1.close();
+	              pst.close();
+	              con2.close();
+
+	          } catch (Exception ex) {
+	              JOptionPane.showMessageDialog(f, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+	          }
+
+	        }
+	     if (e.getSource() == btnDelete) {
+
+	    	 from = (String) comboBox.getSelectedItem();
+	    	 int opt = JOptionPane.showConfirmDialog(f, "Are you sure want to delete records?","Delete",JOptionPane.YES_NO_OPTION);
+	    	 if(opt==0) {
+	    	 try {
+	         	//Class.forName("com.mysql.jdbc.Driver"); 
+	         	Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
+	     		Connection con3 = DriverManager.getConnection(jdbcURL);        	
+	             PreparedStatement pst2 = con3.prepareStatement("delete from excel2 where filedate='" + from + "'");
+	             pst2.executeUpdate();
+	             JOptionPane.showMessageDialog(f,"Successfully Deleted records.");
+	             pst2.close();
+	             con3.close();
+	             v.remove(from);
+	             model.setRowCount(0);
+	        }catch(Exception ee) {
+	        	System.out.println(ee);	}
+	    	 }
+	     }
+	     if (e.getSource() == btnSummary) {
+
+	         try {
+	        	from = (String) comboBox.getSelectedItem();
+	         	//Class.forName("com.mysql.jdbc.Driver");
+	        	Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
+	     		Connection con4 = DriverManager.getConnection(jdbcURL);        	
+	             PreparedStatement pst3 = con4.prepareStatement("select count(*) from excel2 where region = 'sla breach' and filedate='" + from + "'");
+	             PreparedStatement pst4 = con4.prepareStatement("select count(*) from excel2 where filedate='" + from + "'");
+	             summary = new JFrame();
+	             String sumtitle = "SLA Breach summary table for "+from;
+	             summary.setTitle(sumtitle);
+	              summodel = new DefaultTableModel();
+		          summodel.setColumnIdentifiers(sumcolumnNames);
+		          tab = new JTable();
+		          tab.setModel(summodel);
+		          tab.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+		          tab.setFillsViewportHeight(true);
+		          scroll2 = new JScrollPane(tab);
+		    	    scroll2.setBounds(20, 20, 500, 100);
+
+		            scroll2.setHorizontalScrollBarPolicy(
+
+		                    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+
+		            scroll2.setVerticalScrollBarPolicy(
+
+		                    JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		          summary.setVisible(true);
+		          summary.getContentPane().add(scroll2);
+		          summary.setSize(600,300);  
+		  	      summary.getContentPane().setLayout(null);  		  	   
+		  	      
+		          ResultSet rss = pst3.executeQuery();
+		          ResultSet r = pst4.executeQuery();
+		          rss.next();
+		          slabreach = rss.getInt(1);
+		          r.next();
+		          int tcount = r.getInt(1);
+		          int nobreach = tcount-slabreach;
+		          summodel.addRow(new Object[]{tcount,slabreach,nobreach});
+		        
+	             pst3.close();
+	             pst4.close();
+	             con4.close();
+	            
+	        }catch(Exception ee) {
+	        	ee.printStackTrace();	}
+	    	 
+	     }
+		if(e.getSource()== b1){  
+		    fc=new JFileChooser();
+		    int i=fc.showOpenDialog(b1);
+			if (i == JFileChooser.APPROVE_OPTION) {
+		        file = fc.getSelectedFile();
+		        filepath = file.getPath();
+		        filestr = String.valueOf(file);
+		        try {
+		           fileName = file.getName();
+		           int pos = fileName.lastIndexOf(".");
+		           if (pos > 0) {
+		        	   fileName=fileName.substring(0, pos);
+		           }
+		           filedate = fileName.substring(fileName.length() - 10);
+		           //System.out.println(fileName+"\n"+filedate+"\n"+filestr);
+//		           String jdbcURL ="jdbc:oracle:thin:@localhost:1521:xe";
+//		           String username = "system";
+//		           String password = "root";
+		          
+		    
+		           	   int batchSize = 20;
+		               long start = System.currentTimeMillis();
+             
+		               //Class.forName("oracle.jdbc.driver.OracleDriver"); 
+		               //Class.forName("com.mysql.jdbc.Driver");
+		               Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
+		               con = DriverManager.getConnection(jdbcURL);
+		               con.setAutoCommit(false);
+		               //String sql = "INSERT INTO excel2 (filedate,region, rep, item) VALUES (?, ?, ?, ?)";
+	  		             
+		                //PreparedStatement statement = conn.prepareStatement(sql);
+		               PreparedStatement pstm=null;
+		               //conn.setAutoCommit(false);
+		                
+		                
+		               
+		               FileInputStream inputStream = new FileInputStream(filestr);
+		               Workbook workbook = new XSSFWorkbook(inputStream);
+		               Sheet sheet = workbook.getSheetAt(0);
+		               
+		           		Row row;
+		           		for (int j = 1; j <= sheet.getLastRowNum(); j++) {
+		           				row = (Row) sheet.getRow(j);
+		           				String region = row.getCell(0).getStringCellValue();
+		           				String rep = row.getCell(1).getStringCellValue();
+
+		           				String item = row.getCell(2).getStringCellValue();
+		           				
+
+		           				String sql = "INSERT INTO excel2 VALUES('" + filedate + "','" + region + "','" + rep + "','" + item + "')";
+		           				pstm = (PreparedStatement) con.prepareStatement(sql);
+		           				pstm.execute();
+		           				
+		           		}
+	                   
+		               /*
+		               Iterator<Row> rowIterator = firstSheet.iterator(); 
+		               int count = 0;
+		               int columnIndex;
+		               rowIterator.next(); // skip the header row
+		               
+		               while (rowIterator.hasNext()) {
+		            	   
+		                   Row nextRow = rowIterator.next();
+		                   
+		                   Iterator<Cell> cellIterators = nextRow.cellIterator();
+		                   
+		                  
+		                    while (cellIterators.hasNext()) {
+		                    	statement.setString(1, filedate);
+		                       Cell nextCell = cellIterators.next();
+		                	   
+		                       columnIndex = nextCell.getColumnIndex();
+		                       System.out.println(columnIndex);
+		                       if(columnIndex==0) {
+		                      
+		                    	   String region = nextCell.getStringCellValue();
+		                           statement.setString(2, region);
+		                           
+		                       }
+		                       else if(columnIndex==1){
+		                    	   String rep = nextCell.getStringCellValue();
+		                           statement.setString(3, rep);
+		                          
+		                       }
+		                       else if(columnIndex==2){
+		                    	   String item = nextCell.getStringCellValue();
+		                           statement.setString(4, item);
+		                           
+		                       }
+		                       
+		                    } */
+
+//		                   statement.executeQuery();
+//		                   statement.addBatch();
+//		                  count= count +1;
+//		                   if (count % batchSize == 0) {
+//		                       statement.executeBatch();
+//		                       count=0;
+//		                      
+//		                   }              
+
+		               workbook.close();
+
+		               con.commit();
+		               pstm.close();
+		                
+		               long end = System.currentTimeMillis();
+		               System.out.printf("Import done in %d ms\n", (end - start));
+		               JOptionPane.showMessageDialog(f,"Successfully Inserted records in database .");
+		               v.add(filedate);
+		         
+		        }
+		        catch (IOException ex1) {
+		               System.out.println("Error reading file");
+		               ex1.printStackTrace();
+		        } catch (Exception ex2) {
+		               System.out.println("Database error");
+		               JOptionPane.showMessageDialog(f,"Error while inserting records in database .");
+		               ex2.printStackTrace();
+		           }
+		       
+		       
+		    } 
+		    else {
+		        System.out.println("File access cancelled by user.");
+		    }   
+		}
+	}   
+
+    
+	public static void main(String[] args) {	
+		
+		new Dashboard();
+		
+	}
+}
